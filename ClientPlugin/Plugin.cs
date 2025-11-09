@@ -4,6 +4,7 @@ using System.Reflection;
 using ClientPlugin.Config;
 using ClientPlugin.GUI;
 using HarmonyLib;
+using Sandbox.Game.Entities;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
 using Sandbox.ModAPI;
@@ -52,23 +53,37 @@ namespace ClientPlugin
 
         public void Update()
         {
-            if (MySession.Static != null && MyInput.Static != null)
+            if (MySession.Static == null || MyInput.Static == null)
             {
-                float currScale = Config.Scale;
+                return;
+            }
 
-                if (MyInput.Static.IsKeyPress(MyKeys.Alt) && MyInput.Static.IsKeyPress(MyKeys.Shift))
-                {
-                    float delta = MyInput.Static.DeltaMouseScrollWheelValue();
-                    if (MyInput.Static.IsKeyPress(MyKeys.Alt) && MyInput.Static.IsKeyPress(MyKeys.Shift) && delta != 0)
-                    {
-                        desiredScale = MathHelper.Clamp(desiredScale - MathHelper.ToRadians(delta / 100f), 0.018f, 2.5f);
-                        MyAPIGateway.Utilities.ShowNotification("Scale: " + Math.Round(currScale, 1), 20);
-                    }
-                    if (Math.Round(desiredScale, 2) != Math.Round(currScale, 2))
-                    {
-                        Config.Scale = (float)MathHelper.Lerp(currScale, desiredScale, .15f);
-                    }
-                }
+            if (!MyInput.Static.IsKeyPress(MyKeys.Alt) && !MyInput.Static.IsKeyPress(MyKeys.Shift))
+            {
+                return;
+            }
+
+            if (MyCubeBuilder.Static.IsActivated)
+            {
+                return;
+            }
+
+            if (!MySession.Static.LocalCharacter.IsInFirstPersonView)
+            {
+                return;
+            }
+
+            float currScale = Config.Scale;
+
+            float delta = MyInput.Static.DeltaMouseScrollWheelValue();
+            if (MyInput.Static.IsKeyPress(MyKeys.Alt) && MyInput.Static.IsKeyPress(MyKeys.Shift) && delta != 0)
+            {
+                desiredScale = MathHelper.Clamp(desiredScale - MathHelper.ToRadians(delta / 100f), 0.018f, 2.5f);
+                MyAPIGateway.Utilities.ShowNotification("Scale: " + Math.Round(currScale, 1), 20);
+            }
+            if (Math.Round(desiredScale, 2) != Math.Round(currScale, 2))
+            {
+                Config.Scale = (float)MathHelper.Lerp(currScale, desiredScale, .15f);
             }
         }
 

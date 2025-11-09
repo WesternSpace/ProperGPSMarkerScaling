@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
+using Sandbox.Game.GUI.HudViewers;
 using System;
 using VRage.Game.Gui;
 using VRageMath;
 
 namespace ClientPlugin.Patches
 {
-    [HarmonyPatch("Sandbox.Game.GUI.HudViewers.MyHudMarkerRenderBase", "AddTexturedQuad")]
+    [HarmonyPatch(typeof(MyHudMarkerRenderBase), "AddTexturedQuad")]
     [HarmonyPatch(new Type[] { typeof(MyHudTexturesEnum), typeof(Vector2), typeof(Vector2), typeof(Color), typeof(float), typeof(float) })]
     internal static class MyHudMarkerRenderBase_AddTexturedQuad
     {
@@ -18,7 +19,7 @@ namespace ClientPlugin.Patches
         }
     }
 
-    [HarmonyPatch("Sandbox.Game.GUI.HudViewers.MyHudMarkerRenderBase", "AddTexturedQuad")]
+    [HarmonyPatch(typeof(MyHudMarkerRenderBase), "AddTexturedQuad")]
     [HarmonyPatch(new Type[] { typeof(string), typeof(Vector2), typeof(Color), typeof(float), typeof(float), typeof(bool) })]
     internal static class MyHudMarkerRenderBase_AddTexturedQuad_String
     {
