@@ -63,12 +63,13 @@ namespace ClientPlugin
                 return;
             }
 
-            if (MyCubeBuilder.Static.IsActivated)
+
+            if (MyCubeBuilder.Static?.IsActivated ?? false)
             {
                 return;
             }
 
-            if (!MySession.Static.LocalCharacter.IsInFirstPersonView)
+            if (!MySession.Static.LocalCharacter?.IsInFirstPersonView ?? false)
             {
                 return;
             }
