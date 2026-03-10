@@ -20,11 +20,12 @@ namespace ClientPlugin
     {
         public const string Name = "GpsMarkerScaling";
         public static Plugin Instance { get; private set; }
-        private float desiredScale = 1;
 
         public IPluginConfig Config => config?.Data;
         private PersistentConfig<PluginConfig> config;
         private static readonly string ConfigFileName = $"{Name}.cfg";
+
+        private const float SENSITIVITY = 0.001f;
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
@@ -32,15 +33,13 @@ namespace ClientPlugin
         {
             Instance = this;
 
-            if(!Directory.Exists(Path.Combine(MyFileSystem.UserDataPath, "Storage\\PluginData")))
+            if (!Directory.Exists(Path.Combine(MyFileSystem.UserDataPath, "Storage\\PluginData")))
             {
                 Directory.CreateDirectory(Path.Combine(MyFileSystem.UserDataPath, "Storage\\PluginData"));
             }
 
             var configPath = Path.Combine(MyFileSystem.UserDataPath, "Storage\\PluginData", ConfigFileName);
             config = PersistentConfig<PluginConfig>.Load(configPath);
-
-            desiredScale = Config.Scale;
 
             Harmony harmony = new Harmony(Name);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -53,39 +52,49 @@ namespace ClientPlugin
 
         public void Update()
         {
+            if (!IsInputEnabled())
+                return;
+
+            if (!MyInput.Static.IsKeyPress(MyKeys.Alt) || !MyInput.Static.IsKeyPress(MyKeys.Shift))
+            {
+                return;
+            }
+
+            float currentScale = Config.Scale;
+
+            MyAPIGateway.Utilities.ShowNotification("GPS Scale: " + Math.Round(currentScale, 2), 10);
+
+            float targetScale = default;
+            float delta = MyInput.Static.DeltaMouseScrollWheelValue();
+
+            if (delta == 0)
+                return;
+
+            targetScale = MathHelper.Clamp(Config.Scale + (delta * SENSITIVITY), 0.2f, 2.5f);
+            if (Math.Round(targetScale, 2) != Math.Round(currentScale, 2))
+            {
+                Config.Scale = (float)MathHelper.Lerp(currentScale, targetScale, .15f);
+            }
+        }
+
+        private bool IsInputEnabled()
+        {
             if (MySession.Static == null || MyInput.Static == null)
             {
-                return;
+                return false;
             }
-
-            if (!MyInput.Static.IsKeyPress(MyKeys.Alt) && !MyInput.Static.IsKeyPress(MyKeys.Shift))
-            {
-                return;
-            }
-
 
             if (MyCubeBuilder.Static?.IsActivated ?? false)
             {
-                return;
+                return false;
             }
 
             if (!MySession.Static.LocalCharacter?.IsInFirstPersonView ?? false)
             {
-                return;
+                return false;
             }
 
-            float currScale = Config.Scale;
-
-            float delta = MyInput.Static.DeltaMouseScrollWheelValue();
-            if (MyInput.Static.IsKeyPress(MyKeys.Alt) && MyInput.Static.IsKeyPress(MyKeys.Shift) && delta != 0)
-            {
-                desiredScale = MathHelper.Clamp(desiredScale - MathHelper.ToRadians(delta / 100f), 0.018f, 2.5f);
-                MyAPIGateway.Utilities.ShowNotification("Scale: " + Math.Round(currScale, 1), 20);
-            }
-            if (Math.Round(desiredScale, 2) != Math.Round(currScale, 2))
-            {
-                Config.Scale = (float)MathHelper.Lerp(currScale, desiredScale, .15f);
-            }
+            return true;
         }
 
         public void OpenConfigDialog()

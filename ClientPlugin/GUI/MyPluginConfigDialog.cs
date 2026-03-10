@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using Sandbox;
 using Sandbox.Graphics;
 using Sandbox.Graphics.GUI;
@@ -67,7 +66,7 @@ namespace ClientPlugin.GUI
                 OriginAlign = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP
             };
 
-            checkboxControl = new MyGuiControlSlider(minValue: 0.018f, maxValue: 2.5f, toolTip: tooltip)
+            checkboxControl = new MyGuiControlSlider(minValue: 0.2f, maxValue: 2.5f, toolTip: tooltip)
             {
                 OriginAlign = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP,
                 Enabled = true,
@@ -94,7 +93,7 @@ namespace ClientPlugin.GUI
         {
             base.Draw();
 
-            MyGuiManager.DrawString("White", $"Scale: {Plugin.Instance.Config.Scale}", new Vector2(0.5f), 1f, null, MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
+            MyGuiManager.DrawString("White", $"Scale: {Math.Round(Plugin.Instance.Config.Scale, 2)}", new Vector2(0.5f), 1f, new Color(1f, 1f, 1f, m_transitionAlpha), MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
 
             return true;
         }
